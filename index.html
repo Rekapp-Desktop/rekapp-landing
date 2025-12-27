@@ -1,0 +1,372 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Rekapp Desktop — Crear y gestionar clips de video</title>
+  <meta name="description" content="Rekapp Desktop: aplicación de escritorio por suscripción para crear, editar y gestionar clips de video en tu PC. Pagos seguros con Stripe.">
+  <style>
+    :root {
+      --bg: #0b1020;
+      --card: #11172b;
+      --accent: #1ad1ff;
+      --accent-2: #7b6dff;
+      --text: #e6ecff;
+      --muted: #9aacd6;
+      --border: #1d2640;
+      --success: #2cd2a4;
+      --warning: #f6c344;
+      --shadow: rgba(0,0,0,0.28);
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      font-family: "Inter", "Segoe UI", system-ui, -apple-system, sans-serif;
+      background: radial-gradient(circle at 10% 10%, rgba(26,209,255,0.08), transparent 25%),
+                  radial-gradient(circle at 80% 20%, rgba(123,109,255,0.12), transparent 28%),
+                  var(--bg);
+      color: var(--text);
+      line-height: 1.6;
+    }
+    header {
+      max-width: 1100px;
+      margin: 0 auto;
+      padding: 64px 20px 32px;
+      text-align: center;
+    }
+    header h1 {
+      font-size: clamp(2.2rem, 3vw, 3rem);
+      margin: 0 0 12px;
+    }
+    header p {
+      margin: 0 0 24px;
+      color: var(--muted);
+      font-size: 1.05rem;
+    }
+    .cta {
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+      padding: 14px 22px;
+      border-radius: 14px;
+      background: linear-gradient(135deg, var(--accent), var(--accent-2));
+      color: #051020;
+      font-weight: 700;
+      text-decoration: none;
+      box-shadow: 0 12px 35px rgba(26, 209, 255, 0.25);
+    }
+    .cta.secondary {
+      background: transparent;
+      color: var(--text);
+      border: 1px solid var(--border);
+      box-shadow: none;
+    }
+    main {
+      max-width: 1100px;
+      margin: 0 auto 64px;
+      padding: 0 20px;
+      display: grid;
+      gap: 24px;
+    }
+    section {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: 24px;
+      box-shadow: 0 20px 40px rgba(0,0,0,0.3);
+    }
+    h2 { margin: 0 0 12px; font-size: 1.4rem; }
+    .muted { color: var(--muted); margin: 0 0 16px; }
+    ul { padding-left: 20px; margin: 0; color: var(--text); }
+    li { margin: 6px 0; }
+    .pill {
+      display: inline-block;
+      padding: 6px 12px;
+      border-radius: 999px;
+      border: 1px solid var(--border);
+      margin: 4px 8px 4px 0;
+      color: var(--muted);
+      font-size: 0.95rem;
+    }
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+      gap: 16px;
+    }
+    .card-title { font-weight: 700; margin-bottom: 6px; }
+    .footer {
+      text-align: center;
+      color: var(--muted);
+      padding: 24px 0 40px;
+      font-size: 0.95rem;
+    }
+    a { color: var(--accent); text-decoration: none; }
+    a:hover { text-decoration: underline; }
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      background: rgba(26,209,255,0.12);
+      color: var(--accent);
+      padding: 6px 10px;
+      border-radius: 10px;
+      font-weight: 600;
+      border: 1px solid rgba(26,209,255,0.3);
+      margin-left: 8px;
+    }
+    .split {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+      gap: 18px;
+      align-items: start;
+    }
+    .checklist li { list-style: none; position: relative; padding-left: 22px; }
+    .checklist li::before {
+      content: "✓";
+      position: absolute;
+      left: 0;
+      top: 1px;
+      color: var(--success);
+      font-weight: 700;
+    }
+    .pricing-table {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+      gap: 16px;
+    }
+    .price-card {
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      padding: 18px;
+      background: linear-gradient(160deg, rgba(26,209,255,0.04), rgba(123,109,255,0.05));
+      box-shadow: 0 12px 32px var(--shadow);
+    }
+    .price-card h3 { margin: 0 0 6px; }
+    .price {
+      font-size: 1.8rem;
+      margin: 6px 0 12px;
+      color: var(--accent);
+      font-weight: 800;
+    }
+    .pill-tag {
+      display: inline-block;
+      padding: 5px 10px;
+      border-radius: 10px;
+      background: rgba(123,109,255,0.16);
+      color: var(--accent-2);
+      font-weight: 700;
+      font-size: 0.9rem;
+    }
+    .faq-item {
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 14px;
+      background: #0f1526;
+      box-shadow: inset 0 0 0 1px rgba(255,255,255,0.02);
+    }
+    .faq-item summary {
+      cursor: pointer;
+      font-weight: 700;
+    }
+    .timeline {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      gap: 14px;
+    }
+    .timeline-step {
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 14px;
+      background: #0f1424;
+    }
+    .timeline-step .step {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 32px; height: 32px;
+      border-radius: 10px;
+      background: rgba(26,209,255,0.15);
+      color: var(--accent);
+      font-weight: 800;
+      margin-bottom: 6px;
+    }
+    @media (max-width: 640px) {
+      header { padding-top: 48px; }
+      .cta { width: 100%; justify-content: center; }
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <div class="badge">Pagos seguros con Stripe</div>
+    <h1>Rekapp Desktop</h1>
+    <p>Aplicación de escritorio por suscripción para crear, editar y gestionar clips de video automáticamente en tu PC. Sin dependencias en la nube, control total local.</p>
+    <div style="display:flex;flex-wrap:wrap;justify-content:center;gap:12px;">
+      <a class="cta" href="mailto:soporte@rekapp.app?subject=Licencia%20Rekapp">Contactar soporte</a>
+      <a class="cta secondary" href="#planes">Ver planes</a>
+    </div>
+  </header>
+
+  <main>
+    <section>
+      <h2>Qué incluye</h2>
+      <p class="muted">Flujo completo de generación y curación de clips en tu equipo.</p>
+      <div class="grid">
+        <div>
+          <div class="card-title">Motor de clips local</div>
+          <p class="muted">Procesa videos en tu PC; sin subir archivos a terceros.</p>
+          <span class="pill">Detección de hooks</span>
+          <span class="pill">Recorte inteligente</span>
+          <span class="pill">Subtítulos</span>
+        </div>
+        <div>
+          <div class="card-title">Curation y favoritos</div>
+          <p class="muted">Revisión rápida, favoritos, etiquetas y packs listos para publicar.</p>
+          <span class="pill">Selección masiva</span>
+          <span class="pill">Export texto</span>
+          <span class="pill">Notas y tags</span>
+        </div>
+        <div>
+          <div class="card-title">Export y branding</div>
+          <p class="muted">Exporta clips, packs y assets de texto con tu marca y presets.</p>
+          <span class="pill">Logo y safe area</span>
+          <span class="pill">Presets de export</span>
+          <span class="pill">Informes locales</span>
+        </div>
+      </div>
+    </section>
+
+    <section id="planes">
+      <h2>Planes y licencias</h2>
+      <p class="muted">Licencia por suscripción (mensual/anual) con activación inmediata tras el pago.</p>
+      <div class="pricing-table">
+        <div class="price-card">
+          <div class="pill-tag">Starter</div>
+          <h3>Creadores individuales</h3>
+          <div class="price">15 €/mes</div>
+          <p class="muted" style="margin-top:-6px;">O 150 €/año (ahorras ~17%)</p>
+          <ul class="checklist">
+            <li>1 asiento (1 dispositivo activo)</li>
+            <li>Generación y curación de clips</li>
+            <li>Export básico y texto</li>
+            <li>Soporte por email</li>
+          </ul>
+        </div>
+        <div class="price-card" style="border-color: rgba(26,209,255,0.6); box-shadow: 0 16px 40px rgba(26,209,255,0.25);">
+          <div class="pill-tag" style="background: rgba(26,209,255,0.18); color: var(--accent);">Pro</div>
+          <h3>Equipos pequeños</h3>
+          <div class="price">29 €/mes</div>
+          <p class="muted" style="margin-top:-6px;">O 290 €/año (ahorras ~17%)</p>
+          <ul class="checklist">
+            <li>Hasta 3 asientos</li>
+            <li>Branding y presets avanzados</li>
+            <li>Export packs + informes locales</li>
+            <li>Portal de cliente y gestión de dispositivos</li>
+          </ul>
+        </div>
+        <div class="price-card">
+          <div class="pill-tag" style="background: rgba(123,109,255,0.2); color: var(--accent-2);">Studio</div>
+          <h3>Postproducción</h3>
+          <div class="price">49 €/mes</div>
+          <p class="muted" style="margin-top:-6px;">O 490 €/año (ahorras ~17%)</p>
+          <ul class="checklist">
+            <li>Hasta 5 asientos</li>
+            <li>Automatización y reglas</li>
+            <li>Prioridad en soporte</li>
+            <li>Opciones de webhook / reportes</li>
+          </ul>
+        </div>
+      </div>
+      <p class="muted" style="margin-top:12px;">Cancelación en cualquier momento desde el portal de cliente. Pagos gestionados con Stripe; factura y confirmación por email. Todos los precios en EUR con IVA según corresponda.</p>
+    </section>
+
+    <section>
+      <h2>Soporte y contacto</h2>
+      <p class="muted">Resolvemos dudas de activación, licencias y uso.</p>
+      <ul>
+        <li>Email soporte: <a href="mailto:soporte@rekapp.app">soporte@rekapp.app</a></li>
+        <li>Tiempo de respuesta habitual: 24-48 h</li>
+        <li>Reembolsos: según condiciones del plan y política de cancelación</li>
+      </ul>
+    </section>
+
+    <section>
+      <h2>Confianza y privacidad</h2>
+      <p class="muted">Tu contenido se procesa en tu propio equipo; no subimos videos a servidores externos.</p>
+      <ul>
+        <li>Pagos seguros con Stripe y verificación 3D Secure cuando aplique.</li>
+        <li>Sin venta de datos; solo usamos la info necesaria para licencias y facturación.</li>
+        <li>Para cualquier solicitud de datos o baja, escríbenos a soporte.</li>
+      </ul>
+      <p class="muted">Documentos legales: <a href="#privacidad">Política de privacidad</a> · <a href="#terminos">Términos de servicio</a> · <a href="#cancelacion">Política de cancelación</a></p>
+    </section>
+
+    <section>
+      <h2>Cómo funciona</h2>
+      <div class="timeline">
+        <div class="timeline-step">
+          <div class="step">1</div>
+          <div class="card-title">Descarga e instala</div>
+          <p class="muted">Descarga Rekapp Desktop y activa tu licencia con email.</p>
+        </div>
+        <div class="timeline-step">
+          <div class="step">2</div>
+          <div class="card-title">Crea clips</div>
+          <p class="muted">Procesa videos en local y genera clips con subtítulos y branding.</p>
+        </div>
+        <div class="timeline-step">
+          <div class="step">3</div>
+          <div class="card-title">Revisa y exporta</div>
+          <p class="muted">Marca favoritos, aplica presets y exporta packs o assets de texto.</p>
+        </div>
+        <div class="timeline-step">
+          <div class="step">4</div>
+          <div class="card-title">Gestiona tu cuenta</div>
+          <p class="muted">Administra asientos, dispositivos y facturación desde el portal seguro.</p>
+        </div>
+      </div>
+    </section>
+
+    <section>
+      <h2>FAQ rápido</h2>
+      <div class="grid">
+        <details class="faq-item">
+          <summary>¿Necesito subir mis videos?</summary>
+          <p class="muted">No. Todo el procesamiento ocurre en tu PC. No subimos tus videos a la nube.</p>
+        </details>
+        <details class="faq-item">
+          <summary>¿Puedo cancelar cuando quiera?</summary>
+          <p class="muted">Sí. Cancelas desde el portal de cliente; mantienes acceso hasta el fin del periodo pagado.</p>
+        </details>
+        <details class="faq-item">
+          <summary>¿Cómo gestiono mis dispositivos?</summary>
+          <p class="muted">Cada asiento equivale a un dispositivo activo. Puedes desactivar/activar desde la app.</p>
+        </details>
+        <details class="faq-item">
+          <summary>¿Qué métodos de pago aceptan?</summary>
+          <p class="muted">Stripe: tarjetas principales y métodos locales según tu país.</p>
+        </details>
+      </div>
+    </section>
+
+    <section id="privacidad">
+      <h2>Política de privacidad (resumen)</h2>
+      <p class="muted">Recogemos email y datos de pago para licencias y facturación. No procesamos tus videos en servidores externos; el procesamiento ocurre en tu PC.</p>
+    </section>
+
+    <section id="terminos">
+      <h2>Términos de servicio (resumen)</h2>
+      <p class="muted">Licencia de uso individual por suscripción. Prohibido redistribuir la app. Cancelable en cualquier momento desde el portal de cliente.</p>
+    </section>
+
+    <section id="cancelacion">
+      <h2>Cancelación y reembolsos</h2>
+      <p class="muted">Puedes cancelar en cualquier momento; el acceso se mantiene hasta fin del periodo pagado. Reembolsos sujetos a revisión caso a caso.</p>
+    </section>
+  </main>
+
+  <div class="footer">
+    Rekapp Desktop · Pagos seguros con Stripe · Contacto: soporte@rekapp.app
+  </div>
+</body>
+</html>
